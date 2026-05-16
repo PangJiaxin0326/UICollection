@@ -5,6 +5,10 @@ import PackageDescription
 
 let package = Package(
     name: "UICollection",
+    platforms: [
+        .iOS("26.5"),
+        .macOS("26.5"),
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
