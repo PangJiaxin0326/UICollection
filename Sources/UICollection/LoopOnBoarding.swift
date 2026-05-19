@@ -172,7 +172,7 @@ struct LoopOnBoarding: View {
     }
 }
 
-struct ContentView: View {
+struct LoopOnBoardingPreview: View {
     @State private var showButton: Bool = true
     let phaseData: [LoopOnBoarding.Phase] = [
         .init(symbol: "network.badge.shield.half.filled", title: "Secure Network Protection", description: "Protects your connection with advanced\nsecurity and encrypted network traffic."),
@@ -188,5 +188,5 @@ struct ContentView: View {
     }
 }
 #Preview {
-    ContentView()
+    LoopOnBoardingPreview()
 }
