@@ -30,6 +30,7 @@ public struct ProfileView<Content: View>: View {
                     Header
                 }
             }
+            .background(.fill.tertiary)
             .scrollIndicators(.hidden)
             .onScrollGeometryChange(for: CGFloat.self) {
                 $0.contentInsets.top
@@ -52,18 +53,51 @@ public struct ProfileView<Content: View>: View {
     }
 
     public struct Config {
+        public struct HeaderActionButton: Identifiable {
+            public var id: String
+            public var title: String
+            public var systemImage: String
+            public var tint: Color
+            public var action: () -> ()
+
+            public init(
+                _ title: String,
+                systemImage: String,
+                tint: Color = .blue,
+                action: @escaping () -> () = {}
+            ) {
+                self.id = "\(title)-\(systemImage)"
+                self.title = title
+                self.systemImage = systemImage
+                self.tint = tint
+                self.action = action
+            }
+
+            public static func telegramDefaults() -> [HeaderActionButton] {
+                [
+                    .init("Message", systemImage: "message.fill"),
+                    .init("Call", systemImage: "phone.fill", tint: .green),
+                    .init("Video", systemImage: "video.fill", tint: .purple),
+                    .init("More", systemImage: "ellipsis", tint: .gray)
+                ]
+            }
+        }
+
         public var avatarURL: URL
         public var userName: String
         public var userHandle: String
+        public var headerButtons: [HeaderActionButton]
 
         public init(
             avatarURL: URL = URL(string: "placeholder")!,
             userName: String = "User Nickname",
-            userHandle: String = "User Handle"
+            userHandle: String = "User Handle",
+            headerButtons: [HeaderActionButton] = HeaderActionButton.telegramDefaults()
         ) {
             self.avatarURL = avatarURL
             self.userName = userName
             self.userHandle = userHandle
+            self.headerButtons = headerButtons
         }
     }
 }
@@ -148,17 +182,23 @@ extension ProfileView {
 
     @ViewBuilder
     private func HeaderNavigationBar() -> some View {
-        VStack(alignment: isLargeHeader ? .leading : .center, spacing: 6) {
-            Text(config.userName)
-                .font(.title)
-                .fontWeight(.semibold)
-                .onTapGesture {
-                    // Switch Account Sheet
-                }
+        VStack(alignment: isLargeHeader ? .leading : .center, spacing: 12) {
+            VStack(alignment: isLargeHeader ? .leading : .center, spacing: 6) {
+                Text(config.userName)
+                    .font(.title)
+                    .fontWeight(.semibold)
+                    .onTapGesture {
+                        // Switch Account Sheet
+                    }
 
-            Text(config.userHandle)
-                .font(.callout)
-                .foregroundStyle(.secondary)
+                Text(config.userHandle)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+
+            if !config.headerButtons.isEmpty {
+                HeaderActionButtonRow()
+            }
         }
         .frame(maxWidth: .infinity, alignment:  isLargeHeader ? .leading : .center)
         .visualEffect { content, proxy in
@@ -170,6 +210,47 @@ extension ProfileView {
         }
         .background(NavigationBarBackground())
         .zIndex(10)
+    }
+
+    @ViewBuilder
+    private func HeaderActionButtonRow() -> some View {
+        HStack(spacing: 6) {
+            ForEach(config.headerButtons) { button in
+                HeaderActionButton(button)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private func HeaderActionButton(_ button: Config.HeaderActionButton) -> some View {
+        Button(action: button.action) {
+            VStack(spacing: 2) {
+                Image(systemName: button.systemImage)
+                    .font(.title3)
+                    .frame(height: 30)
+                    .foregroundStyle(button.tint)
+
+                Text(button.title)
+                    .font(.caption)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 5)
+            .background {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(.background)
+                        .opacity(isLargeHeader ? 0 : 1)
+                    
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(.ultraThinMaterial)
+                        .opacity(isLargeHeader ? 0.8 : 0)
+                        .environment(\.colorScheme, .dark)
+                }
+            }
+            .contentShape(.rect)
+        }
+        .accessibilityLabel(button.title)
+        .frame(maxWidth: 150)
     }
 
     @ViewBuilder
