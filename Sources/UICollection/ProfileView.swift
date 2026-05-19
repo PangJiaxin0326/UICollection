@@ -118,6 +118,7 @@ extension ProfileView {
                 
                 if !config.headerButtons.isEmpty {
                     HeaderActionButtonRow()
+                        .padding(.horizontal)
                 }
             }
         }
