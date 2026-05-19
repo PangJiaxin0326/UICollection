@@ -115,6 +115,10 @@ extension ProfileView {
                 HeaderNavigationBar()
                     .foregroundStyle(isLargeHeader ? .white : .primary)
                     .padding(.horizontal, 15)
+                
+                if !config.headerButtons.isEmpty {
+                    HeaderActionButtonRow()
+                }
             }
         }
         .padding(.bottom, 10)
@@ -196,9 +200,6 @@ extension ProfileView {
                     .foregroundStyle(.secondary)
             }
 
-            if !config.headerButtons.isEmpty {
-                HeaderActionButtonRow()
-            }
         }
         .frame(maxWidth: .infinity, alignment:  isLargeHeader ? .leading : .center)
         .visualEffect { content, proxy in
