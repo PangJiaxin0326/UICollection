@@ -8,11 +8,17 @@
 #if os(iOS)
 import SwiftUI
 
-struct FlexibleTabBar: View {
-    var tabs: [TabItem]
+public struct FlexibleTabBar: View {
+    public var tabs: [TabItem]
     @Binding var config: Config
     @State private var isGlassInteractionEnabled: Bool = true
-    var body: some View {
+
+    public init(tabs: [TabItem], config: Binding<Config>) {
+        self.tabs = tabs
+        self._config = config
+    }
+
+    public var body: some View {
         GlassEffectContainer(spacing: 10) {
             let isMorphed = config.isMorphed
             let tabActions = config.tabActions
@@ -89,36 +95,75 @@ struct FlexibleTabBar: View {
         .allowsHitTesting(config.isMorphed)
     }
 
-    struct Config {
-        var activeTab: Int
-        var flexibility: Flexibility = .fixed
-        var isMorphed: Bool = false
-        var tabActions: TabActions?
-        var morphAnimation: Animation = .smooth
+    public struct Config {
+        public var activeTab: Int
+        public var flexibility: Flexibility = .fixed
+        public var isMorphed: Bool = false
+        public var tabActions: TabActions?
+        public var morphAnimation: Animation = .smooth
 
-        struct TabActions {
-            var mainActionShape: MainActionShape = .capsule
-            var mainActionForeground: Color = .white
-            var mainActionBackground: Color = .red
-            var mainAction: ActionItem
-            var leadingAction: ActionItem?
-            var trailingAction: ActionItem?
+        public init(
+            activeTab: Int,
+            flexibility: Flexibility = .fixed,
+            isMorphed: Bool = false,
+            tabActions: TabActions? = nil,
+            morphAnimation: Animation = .smooth
+        ) {
+            self.activeTab = activeTab
+            self.flexibility = flexibility
+            self.isMorphed = isMorphed
+            self.tabActions = tabActions
+            self.morphAnimation = morphAnimation
         }
-        struct ActionItem {
-            var symbol: String
-            var action: () -> ()
+
+        public struct TabActions {
+            public var mainActionShape: MainActionShape = .capsule
+            public var mainActionForeground: Color = .white
+            public var mainActionBackground: Color = .red
+            public var mainAction: ActionItem
+            public var leadingAction: ActionItem?
+            public var trailingAction: ActionItem?
+
+            public init(
+                mainActionShape: MainActionShape = .capsule,
+                mainActionForeground: Color = .white,
+                mainActionBackground: Color = .red,
+                mainAction: ActionItem,
+                leadingAction: ActionItem? = nil,
+                trailingAction: ActionItem? = nil
+            ) {
+                self.mainActionShape = mainActionShape
+                self.mainActionForeground = mainActionForeground
+                self.mainActionBackground = mainActionBackground
+                self.mainAction = mainAction
+                self.leadingAction = leadingAction
+                self.trailingAction = trailingAction
+            }
         }
-        enum Flexibility: String, CaseIterable {
+        public struct ActionItem {
+            public var symbol: String
+            public var action: () -> ()
+
+            public init(symbol: String, action: @escaping () -> ()) {
+                self.symbol = symbol
+                self.action = action
+            }
+        }
+        public enum Flexibility: String, CaseIterable {
             case fixed = "Fixed"
             case flexible = "Flexible"
         }
-        enum MainActionShape: String, CaseIterable {
+        public enum MainActionShape: String, CaseIterable {
             case circle = "Circle"
             case capsule = "Capsule"
         }
     }
-    struct TabItem {
-        var symbol: String
+    public struct TabItem {
+        public var symbol: String
+
+        public init(symbol: String) {
+            self.symbol = symbol
+        }
     }
 }
 
@@ -187,7 +232,7 @@ struct FlexibleTabBarPreview: View {
                     tabConfig.tabActions = .init(
                         mainAction: .init(symbol: "suit.heart.fill") {},
                         leadingAction: .init(symbol: "hand.thumbsup") {},
-                        trailingAction: .init(symbol: "hand.thumbsdown") {},
+                        trailingAction: .init(symbol: "hand.thumbsdown") {}
                     )
                     Task {
                         tabConfig.isMorphed.toggle()

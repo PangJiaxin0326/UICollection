@@ -8,16 +8,21 @@
 import Foundation
 import SwiftUI
 
-struct ProfileView<Content: View>: View {
+public struct ProfileView<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var isLargeHeader: Bool = false
     @State private var topInset: CGFloat = 0.0
     @State private var scrollPhase: ScrollPhase = .idle
 
-    var config: Config = .init()
+    public var config: Config
     let content: () -> Content
 
-    var body: some View {
+    public init(config: Config = .init(), @ViewBuilder content: @escaping () -> Content) {
+        self.config = config
+        self.content = content
+    }
+
+    public var body: some View {
         NavigationStack {
             ScrollView(.vertical) {
                 content()
@@ -46,10 +51,20 @@ struct ProfileView<Content: View>: View {
         }
     }
 
-    struct Config {
-        var avatarURL: URL = URL(string: "placeholder")!
-        var userName: String = "User Nickname"
-        var userHandle: String = "User Handle"
+    public struct Config {
+        public var avatarURL: URL
+        public var userName: String
+        public var userHandle: String
+
+        public init(
+            avatarURL: URL = URL(string: "placeholder")!,
+            userName: String = "User Nickname",
+            userHandle: String = "User Handle"
+        ) {
+            self.avatarURL = avatarURL
+            self.userName = userName
+            self.userHandle = userHandle
+        }
     }
 }
 
@@ -74,7 +89,7 @@ extension ProfileView {
                 let size = $0.size
                 let minY = $0.frame(in: .global).minY
                 let topOffset = isLargeHeader ? minY : 0
-                LogoView(for: URL(string: "a/aa/aaa")!)
+                LogoView(for: config.avatarURL)
                     .frame(
                         width: size.width,
                         height: size.height + topOffset
@@ -134,14 +149,14 @@ extension ProfileView {
     @ViewBuilder
     private func HeaderNavigationBar() -> some View {
         VStack(alignment: isLargeHeader ? .leading : .center, spacing: 6) {
-            Text("User Nickname")
+            Text(config.userName)
                 .font(.title)
                 .fontWeight(.semibold)
                 .onTapGesture {
                     // Switch Account Sheet
                 }
 
-            Text("User Handle")
+            Text(config.userHandle)
                 .font(.callout)
                 .foregroundStyle(.secondary)
         }
