@@ -167,10 +167,10 @@ extension ProfileView {
     private func AvatarPlaceholder() -> some View {
         ZStack {
             if isLargeHeader {
-                Rectangle().fill(.teal.gradient)
+                Rectangle().fill(.black)
             } else {
                 Circle()
-                    .fill(.teal.gradient)
+                    .fill(.black)
                     .frame(width: 100, height: 100)
                     .blur(radius: 0.5)
             }
