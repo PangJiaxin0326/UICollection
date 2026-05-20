@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct OTPLoginView: View {
+public struct OTPLoginView: View {
     @State private var mobileNumber = ""
     @State private var countryCode: Country?
     @State private var showVerificationView = false
