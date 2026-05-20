@@ -1,0 +1,102 @@
+[
+  {
+    "name": "United States",
+    "dialCode": "+1",
+    "code": "US"
+  },
+  {
+    "name": "China",
+    "dialCode": "+86",
+    "code": "CN"
+  },
+  {
+    "name": "Germany",
+    "dialCode": "+49",
+    "code": "DE"
+  },
+  {
+    "name": "Japan",
+    "dialCode": "+81",
+    "code": "JP"
+  },
+  {
+    "name": "India",
+    "dialCode": "+91",
+    "code": "IN"
+  },
+  {
+    "name": "United Kingdom",
+    "dialCode": "+44",
+    "code": "GB"
+  },
+  {
+    "name": "France",
+    "dialCode": "+33",
+    "code": "FR"
+  },
+  {
+    "name": "Italy",
+    "dialCode": "+39",
+    "code": "IT"
+  },
+  {
+    "name": "Brazil",
+    "dialCode": "+55",
+    "code": "BR"
+  },
+  {
+    "name": "Canada",
+    "dialCode": "+1",
+    "code": "CA"
+  },
+  {
+    "name": "Russia",
+    "dialCode": "+7",
+    "code": "RU"
+  },
+  {
+    "name": "South Korea",
+    "dialCode": "+82",
+    "code": "KR"
+  },
+  {
+    "name": "Australia",
+    "dialCode": "+61",
+    "code": "AU"
+  },
+  {
+    "name": "Spain",
+    "dialCode": "+34",
+    "code": "ES"
+  },
+  {
+    "name": "Mexico",
+    "dialCode": "+52",
+    "code": "MX"
+  },
+  {
+    "name": "Indonesia",
+    "dialCode": "+62",
+    "code": "ID"
+  },
+  {
+    "name": "Netherlands",
+    "dialCode": "+31",
+    "code": "NL"
+  },
+  {
+    "name": "Saudi Arabia",
+    "dialCode": "+966",
+    "code": "SA"
+  },
+  {
+    "name": "Turkey",
+    "dialCode": "+90",
+    "code": "TR"
+  },
+  {
+    "name": "Switzerland",
+    "dialCode": "+41",
+    "code": "CH"
+  }
+]
