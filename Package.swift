@@ -3,11 +3,17 @@
 
 import PackageDescription
 
+let aiUICollectionSwiftSettings: [SwiftSetting] = [
+    .enableUpcomingFeature("StrictConcurrency"),
+    .swiftLanguageMode(.v6),
+]
+
 let package = Package(
     name: "UICollection",
     platforms: [
         .iOS("26.5"),
         .macOS("26.5"),
+        .visionOS("26.5"),
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
@@ -15,6 +21,13 @@ let package = Package(
             name: "UICollection",
             targets: ["UICollection"]
         ),
+        .library(
+            name: "AIUICollection",
+            targets: ["AIUICollection"]
+        ),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/PangJiaxin0326/AIToolKit.git", branch: "main"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,6 +37,13 @@ let package = Package(
             resources: [
                 .process("Resources")
             ]
+        ),
+        .target(
+            name: "AIUICollection",
+            dependencies: [
+                .product(name: "AIToolKit", package: "AIToolKit"),
+            ],
+            swiftSettings: aiUICollectionSwiftSettings
         ),
         .testTarget(
             name: "UICollectionTests",
