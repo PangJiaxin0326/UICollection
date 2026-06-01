@@ -37,7 +37,7 @@ public struct AICarouselViewTool: ViewTool {
         CTA via the host's render closure.
         """
 
-    public static let schema: ToolSchema = .object(
+    public static let inputSchema: ToolSchema = .object(
         properties: [
             "model": .string(description: ViewToolDefaults.modelHelp),
             "title": .string(description: "Section title shown above the carousel."),
@@ -45,7 +45,7 @@ public struct AICarouselViewTool: ViewTool {
         required: ["model", "title"]
     )
 
-    public func makeView(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

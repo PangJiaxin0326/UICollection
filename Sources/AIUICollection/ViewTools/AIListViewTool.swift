@@ -37,7 +37,7 @@ public struct AIListViewTool: ViewTool {
         (contacts, documents, companies). The host owns detail-on-tap.
         """
 
-    public static let schema: ToolSchema = .object(
+    public static let inputSchema: ToolSchema = .object(
         properties: [
             "model": .string(description: ViewToolDefaults.modelHelp),
             "sortedBy": .string(description: "Initial sort: 'Most recent', 'Oldest first', 'A–Z', 'Z–A'."),
@@ -45,7 +45,7 @@ public struct AIListViewTool: ViewTool {
         required: ["model"]
     )
 
-    public func makeView(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

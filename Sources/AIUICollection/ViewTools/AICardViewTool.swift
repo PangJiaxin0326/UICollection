@@ -37,7 +37,7 @@ public struct AICardViewTool: ViewTool {
         answer is one item, not a list.
         """
 
-    public static let schema: ToolSchema = .object(
+    public static let inputSchema: ToolSchema = .object(
         properties: [
             "model": .string(description: ViewToolDefaults.modelHelp),
             "id": .string(description: "Optional id of the specific entity within the model. Omit when the model has one canonical item."),
@@ -45,7 +45,7 @@ public struct AICardViewTool: ViewTool {
         required: ["model"]
     )
 
-    public func makeView(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

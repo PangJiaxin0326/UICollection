@@ -37,7 +37,7 @@ public struct AIStatsViewTool: ViewTool {
         signed delta percent for period-over-period change.
         """
 
-    public static let schema: ToolSchema = .object(
+    public static let inputSchema: ToolSchema = .object(
         properties: [
             "model": .string(description: ViewToolDefaults.modelHelp),
             "title": .string(description: "Dashboard title (e.g. 'This week')."),
@@ -46,7 +46,7 @@ public struct AIStatsViewTool: ViewTool {
         required: ["model", "title"]
     )
 
-    public func makeView(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

@@ -47,7 +47,7 @@ public struct AIChartViewTool: ViewTool {
         point for scatter, sector for part-of-whole.
         """
 
-    public static let schema: ToolSchema = .object(
+    public static let inputSchema: ToolSchema = .object(
         properties: [
             "model": .string(description: ViewToolDefaults.modelHelp),
             "title": .string(description: "Chart title."),
@@ -57,7 +57,7 @@ public struct AIChartViewTool: ViewTool {
         required: ["model", "title", "subtitle", "kind"]
     )
 
-    public func makeView(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }
