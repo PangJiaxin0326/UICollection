@@ -1,0 +1,15 @@
+{
+  "originHash" : "2f63d1637c15721aeceaae376cb758cd9ad4fd7a8f070383bd0fef04870f86ff",
+  "pins" : [
+    {
+      "identity" : "aitoolkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/PangJiaxin0326/AIToolKit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "8deb105610bb641b94df365d0b38d88a9c5d9717"
+      }
+    }
+  ],
+  "version" : 3
+}
