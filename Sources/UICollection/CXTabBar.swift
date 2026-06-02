@@ -49,11 +49,14 @@ struct CXTabBar<T: FABTab, TabContent: View, TabFabContent: View, AccessoryConte
     
     @Binding var activeTab: T?
     @State private var isFABExpanded: Bool = false
+    @State private var fabHeight: CGFloat = 220
     @State private var tabBar: UITabBar?
+    @Namespace private var ns
     
     let tabContent: (T) -> TabContent
     let tabFabContent: (T) -> TabFabContent
     let accessoryContent: () -> AccessoryContent
+    
 
     
     init(selection activeTab: Binding<T?>, tabContent: @escaping (T) -> TabContent, tabFabContent: @escaping (T) -> TabFabContent, accessoryContent: @escaping () -> AccessoryContent) {
@@ -70,11 +73,13 @@ struct CXTabBar<T: FABTab, TabContent: View, TabFabContent: View, AccessoryConte
                     tabContent(tab)
                         .tabOverlay(isPresented: isFABExpanded) {
                             tabFabContent(tab)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 220)
+                                .frame(maxWidth: .infinity, maxHeight: fabHeight)
                         } onDismiss: {
                             isFABExpanded = false
                         }
+                        .frame(maxWidth: .infinity, alignment: .bottom)
+                        .onTapGesture { fabHeight = 660 - fabHeight }
+                        .animation(.smooth, value: fabHeight)
                 }
             }
             Tab.init(value: .none, role: .search) {
@@ -121,11 +126,13 @@ struct AccessoryView: View {
     
     @State var test: String = ""
     var body: some View {
-        TextField("Hello", text: $test)
-            .padding(.horizontal)
-            .onChange(of: placement) { oldValue, newValue in
-                onPlacementChanged(oldValue, newValue)
-            }
+        VStack {
+            Text("hello")
+                .padding(.horizontal)
+                .onChange(of: placement) { oldValue, newValue in
+                    onPlacementChanged(oldValue, newValue)
+                }
+        }
     }
 }
 
@@ -163,6 +170,7 @@ struct TabOverlayModifier<ViewContent: View>: ViewModifier {
                     if isPresented {
                         viewContent
                             .clipShape(.rect(cornerRadius: 30))
+                            .contentShape(.rect(cornerRadius: 30))
                             .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 30))
                             .frame(maxHeight: .infinity, alignment: .bottom)
                             .padding(.horizontal, 15)
