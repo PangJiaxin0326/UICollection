@@ -7,6 +7,12 @@
 
 import Foundation
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+#if canImport(AppKit)
+import AppKit
+#endif
 
 public struct ProfileView<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -30,7 +36,9 @@ public struct ProfileView<Content: View>: View {
                     Header
                 }
             }
-            .background(.fill.tertiary)
+            .background {
+                config.backgroundStyle.view
+            }
             .scrollIndicators(.hidden)
             .onScrollGeometryChange(for: CGFloat.self) {
                 $0.contentInsets.top
@@ -53,6 +61,13 @@ public struct ProfileView<Content: View>: View {
     }
 
     public struct Config {
+        public enum BackgroundStyle {
+            case grouped
+            case tertiaryFill
+            case clear
+            case color(Color)
+        }
+
         public struct HeaderActionButton: Identifiable {
             public var id: String
             public var title: String
@@ -87,17 +102,52 @@ public struct ProfileView<Content: View>: View {
         public var userName: String
         public var userHandle: String
         public var headerButtons: [HeaderActionButton]
+        public var placeholderSystemImage: String
+        public var backgroundStyle: BackgroundStyle
 
         public init(
             avatarURL: URL = URL(string: "placeholder")!,
             userName: String = "User Nickname",
             userHandle: String = "User Handle",
-            headerButtons: [HeaderActionButton] = HeaderActionButton.telegramDefaults()
+            headerButtons: [HeaderActionButton] = [],
+            placeholderSystemImage: String = "person.crop.circle.fill",
+            backgroundStyle: BackgroundStyle = .grouped
         ) {
             self.avatarURL = avatarURL
             self.userName = userName
             self.userHandle = userHandle
             self.headerButtons = headerButtons
+            self.placeholderSystemImage = placeholderSystemImage
+            self.backgroundStyle = backgroundStyle
+        }
+    }
+}
+
+private extension ProfileView.Config.BackgroundStyle {
+    @ViewBuilder
+    var view: some View {
+        switch self {
+        case .grouped:
+            #if canImport(UIKit)
+            Color(uiColor: .systemGroupedBackground)
+                .ignoresSafeArea()
+            #elseif canImport(AppKit)
+            Color(nsColor: .windowBackgroundColor)
+                .ignoresSafeArea()
+            #else
+            Color.clear
+                .ignoresSafeArea()
+            #endif
+        case .tertiaryFill:
+            Rectangle()
+                .fill(.fill.tertiary)
+                .ignoresSafeArea()
+        case .clear:
+            Color.clear
+                .ignoresSafeArea()
+        case .color(let color):
+            color
+                .ignoresSafeArea()
         }
     }
 }
@@ -175,7 +225,7 @@ extension ProfileView {
                     .blur(radius: 0.5)
             }
 
-            Image(systemName: "apple.logo")
+            Image(systemName: config.placeholderSystemImage)
                 .font(isLargeHeader ? .system(size: 44, weight: .black, design: .rounded) : .system(size: 18, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
                 .padding(.horizontal, isLargeHeader ? 24 : 10)
