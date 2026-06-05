@@ -266,7 +266,7 @@ extension ProfileView {
 
     @ViewBuilder
     private func HeaderActionButtonRow() -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 10) {
             ForEach(config.headerButtons) { button in
                 HeaderActionButton(button)
             }
@@ -276,22 +276,53 @@ extension ProfileView {
 
     private func HeaderActionButton(_ button: Config.HeaderActionButton) -> some View {
         Button(action: button.action) {
-            VStack(spacing: 2) {
+            HStack(spacing: 8) {
                 Image(systemName: button.systemImage)
-                    .font(.title3)
-                    .frame(height: 30)
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(button.tint)
+                    .frame(width: 24, height: 24)
+                    .background(button.tint.opacity(0.12), in: Circle())
 
                 Text(button.title)
-                    .font(.caption)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 5)
-            .dashboardCard(cornerRadius: 15)
-            .contentShape(.rect)
+            .padding(.leading, 8)
+            .padding(.trailing, 12)
+            .padding(.vertical, 8)
+            .frame(minWidth: 96, maxWidth: 164, minHeight: 40)
+            .background {
+                HeaderActionButtonSurface(tint: button.tint)
+            }
+            .contentShape(Capsule())
         }
+        .buttonStyle(ProfileHeaderActionButtonStyle())
         .accessibilityLabel(button.title)
-        .frame(maxWidth: 150)
+    }
+
+    @ViewBuilder
+    private func HeaderActionButtonSurface(tint: Color) -> some View {
+        Capsule()
+            .fill(.ultraThinMaterial)
+            .overlay {
+                Capsule()
+                    .fill(tint.opacity(colorScheme == .dark ? 0.10 : 0.07))
+            }
+            .overlay {
+                Capsule()
+                    .stroke(
+                        .white.opacity(colorScheme == .dark ? 0.16 : 0.55),
+                        lineWidth: 0.5
+                    )
+            }
+            .shadow(
+                color: .black.opacity(colorScheme == .dark ? 0.22 : 0.08),
+                radius: 12,
+                x: 0,
+                y: 6
+            )
     }
 
     @ViewBuilder
@@ -325,6 +356,15 @@ extension ProfileView {
         .allowsHitTesting(false)
     }
 
+}
+
+private struct ProfileHeaderActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .opacity(configuration.isPressed ? 0.82 : 1)
+            .animation(.snappy(duration: 0.16, extraBounce: 0), value: configuration.isPressed)
+    }
 }
 
 #Preview {
