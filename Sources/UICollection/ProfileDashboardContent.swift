@@ -89,7 +89,7 @@ public struct ProfileDashboardContent: View {
     }
 
     public var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 16) {
             if !metrics.isEmpty {
                 metricsOverview
             }
@@ -98,13 +98,13 @@ public struct ProfileDashboardContent: View {
             }
             trackingSince
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
-        .padding(.bottom, 120)
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 140)
     }
 
     private var metricsOverview: some View {
-        LazyVGrid(columns: columns, spacing: 14) {
+        LazyVGrid(columns: columns, spacing: 12) {
             ForEach(metrics) { metric in
                 ProfileMetricCell(metric: metric)
             }
@@ -144,30 +144,13 @@ private struct ProfileMetricCell: View {
     let metric: ProfileDashboardMetric
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: metric.systemImage)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(metric.tint)
-                .frame(width: 30, height: 30)
-                .background(metric.tint.opacity(0.14), in: RoundedRectangle(cornerRadius: 8))
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(metric.title.uppercased())
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                Text(metric.value)
-                    .font(.title3.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
-        .padding(14)
-        .dashboardCard(cornerRadius: 14)
+        StatDashboardCard(
+            label: metric.title,
+            tint: metric.tint,
+            icon: metric.systemImage,
+            value: metric.value,
+            valueColor: .primary
+        )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(metric.accessibilityLabel ?? "\(metric.title): \(metric.value)")
     }
