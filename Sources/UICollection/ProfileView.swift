@@ -287,18 +287,7 @@ extension ProfileView {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 5)
-            .background {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(.background)
-                        .opacity(isLargeHeader ? 0 : 1)
-                    
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(.ultraThinMaterial)
-                        .opacity(isLargeHeader ? 0.8 : 0)
-                        .environment(\.colorScheme, .dark)
-                }
-            }
+            .dashboardCard(cornerRadius: 15)
             .contentShape(.rect)
         }
         .accessibilityLabel(button.title)

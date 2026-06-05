@@ -109,8 +109,6 @@ public struct ProfileDashboardContent: View {
                 ProfileMetricCell(metric: metric)
             }
         }
-        .padding(16)
-        .dashboardCard()
     }
 
     private var activitySection: some View {
@@ -168,6 +166,8 @@ private struct ProfileMetricCell: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
+        .padding(14)
+        .dashboardCard(cornerRadius: 14)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(metric.accessibilityLabel ?? "\(metric.title): \(metric.value)")
     }
@@ -187,9 +187,9 @@ private struct ProfileMetricCell: View {
             metrics: [
                 .init(title: "Messages", value: "42", systemImage: "message.fill", tint: .blue),
                 .init(title: "Total Tokens", value: "18.4K", systemImage: "text.word.spacing", tint: .indigo),
-                .init(title: "Active Days", value: "12", systemImage: "calendar", tint: .green),
-                .init(title: "Current Streak", value: "4", systemImage: "flame.fill", tint: .orange),
-                .init(title: "Longest Streak", value: "9", systemImage: "trophy.fill", tint: .yellow),
+                .init(title: "Active Days", value: "12d", systemImage: "calendar", tint: .green),
+                .init(title: "Current Streak", value: "4d", systemImage: "flame.fill", tint: .orange),
+                .init(title: "Longest Streak", value: "9d", systemImage: "trophy.fill", tint: .yellow),
                 .init(title: "Peak Hour", value: "8 PM", systemImage: "clock.fill", tint: .purple),
             ],
             activityDates: [Date()],
