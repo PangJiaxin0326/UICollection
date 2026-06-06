@@ -292,7 +292,7 @@ extension ProfileView {
             .padding(.leading, 8)
             .padding(.trailing, 12)
             .padding(.vertical, 8)
-            .frame(minWidth: 96, maxWidth: 164, minHeight: 40)
+            .frame(minWidth: 96, maxWidth: .infinity, minHeight: 40)
             .background {
                 HeaderActionButtonSurface(tint: button.tint)
             }
@@ -300,6 +300,7 @@ extension ProfileView {
         }
         .buttonStyle(ProfileHeaderActionButtonStyle())
         .accessibilityLabel(button.title)
+        .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
