@@ -2,9 +2,7 @@
 //  DistributionBar.swift
 //  UICollection
 //
-//  Single-row proportional bar — each segment's width is its share of the
-//  total. Both apps use this to visualise category breakdowns (Journal: block
-//  kinds, ExpenseTracker: expense categories) on the profile/stats screens.
+//  Single-row proportional bar. Each segment's width is its share of the total.
 //
 
 import SwiftUI

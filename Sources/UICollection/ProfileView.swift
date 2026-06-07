@@ -109,14 +109,6 @@ public struct ProfileView<Content: View>: View {
                 self.action = action
             }
 
-            public static func telegramDefaults() -> [HeaderActionButton] {
-                [
-                    .init("Message", systemImage: "message.fill"),
-                    .init("Call", systemImage: "phone.fill", tint: .green),
-                    .init("Video", systemImage: "video.fill", tint: .purple),
-                    .init("More", systemImage: "ellipsis", tint: .gray)
-                ]
-            }
         }
 
         public var avatarURL: URL

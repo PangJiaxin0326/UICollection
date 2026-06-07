@@ -2,10 +2,9 @@
 //  ActivityHeatmap.swift
 //  UICollection
 //
-//  GitHub-style 7×N contribution heatmap. Both apps use this on the profile
-//  screen to surface day-level activity (Journal: blocks created, ExpenseTracker:
-//  records logged). The view is pure SwiftUI — callers hand in dates and the
-//  grid colours its cells by per-day count.
+//  GitHub-style 7×N contribution heatmap for day-level activity. The view is
+//  pure SwiftUI: callers hand in dates and the grid colours its cells by
+//  per-day count.
 //
 
 import SwiftUI
