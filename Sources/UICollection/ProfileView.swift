@@ -14,6 +14,40 @@ import UIKit
 import AppKit
 #endif
 
+public struct ProfileDashboard {
+    public struct Metric: Identifiable {
+        public var id: String
+        public var value: String
+        public var label: String
+
+        public init(id: String? = nil, value: String, label: String) {
+            self.id = id ?? label
+            self.value = value
+            self.label = label
+        }
+    }
+
+    public var metricRows: [[Metric]]
+    public var activityDates: [Date]
+    public var activeSinceDate: Date?
+    public var activityTitle: String
+    public var activeSinceTitle: String
+
+    public init(
+        metricRows: [[Metric]],
+        activityDates: [Date],
+        activeSinceDate: Date? = nil,
+        activityTitle: String = "ACTIVITY",
+        activeSinceTitle: String = "Active since"
+    ) {
+        self.metricRows = metricRows
+        self.activityDates = activityDates
+        self.activeSinceDate = activeSinceDate
+        self.activityTitle = activityTitle
+        self.activeSinceTitle = activeSinceTitle
+    }
+}
+
 public struct ProfileView<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var isLargeHeader: Bool = false
@@ -28,10 +62,20 @@ public struct ProfileView<Content: View>: View {
         self.content = content
     }
 
+    public init(config: Config = .init()) where Content == EmptyView {
+        self.config = config
+        self.content = { EmptyView() }
+    }
+
     public var body: some View {
         NavigationStack {
             ScrollView(.vertical) {
-                content()
+                VStack(spacing: 0) {
+                    if let dashboard = config.dashboard {
+                        ProfileDashboardView(dashboard: dashboard)
+                    }
+                    content()
+                }
                 .safeAreaInset(edge: .top, spacing: 0) {
                     Header
                 }
@@ -104,6 +148,7 @@ public struct ProfileView<Content: View>: View {
         public var headerButtons: [HeaderActionButton]
         public var placeholderSystemImage: String
         public var backgroundStyle: BackgroundStyle
+        public var dashboard: ProfileDashboard?
 
         public init(
             avatarURL: URL = URL(string: "placeholder")!,
@@ -111,7 +156,8 @@ public struct ProfileView<Content: View>: View {
             userHandle: String = "User Handle",
             headerButtons: [HeaderActionButton] = [],
             placeholderSystemImage: String = "person.crop.circle.fill",
-            backgroundStyle: BackgroundStyle = .grouped
+            backgroundStyle: BackgroundStyle = .grouped,
+            dashboard: ProfileDashboard? = nil
         ) {
             self.avatarURL = avatarURL
             self.userName = userName
@@ -119,6 +165,67 @@ public struct ProfileView<Content: View>: View {
             self.headerButtons = headerButtons
             self.placeholderSystemImage = placeholderSystemImage
             self.backgroundStyle = backgroundStyle
+            self.dashboard = dashboard
+        }
+    }
+}
+
+private struct ProfileDashboardView: View {
+    let dashboard: ProfileDashboard
+
+    var body: some View {
+        VStack(spacing: 24) {
+            if !dashboard.metricRows.isEmpty {
+                statsOverview
+            }
+            activitySection
+            activeSince
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 120)
+    }
+
+    private var statsOverview: some View {
+        let valueFont: Font = .title3.weight(.semibold).monospacedDigit()
+        return VStack(spacing: 14) {
+            ForEach(Array(dashboard.metricRows.enumerated()), id: \.offset) { _, row in
+                HStack(spacing: 0) {
+                    ForEach(row) { metric in
+                        StatCell(value: metric.value, label: metric.label, valueFont: valueFont)
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 16)
+        .dashboardCard()
+    }
+
+    private var activitySection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(dashboard.activityTitle)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            ActivityHeatmap(activityDates: dashboard.activityDates)
+        }
+        .padding(16)
+        .dashboardCard()
+    }
+
+    @ViewBuilder
+    private var activeSince: some View {
+        if let activeSinceDate = dashboard.activeSinceDate {
+            VStack(spacing: 4) {
+                Text(dashboard.activeSinceTitle)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                Text(activeSinceDate, format: .dateTime.month(.wide).year())
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
         }
     }
 }
