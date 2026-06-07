@@ -14,38 +14,15 @@ import UIKit
 import AppKit
 #endif
 
-public struct ProfileDashboard {
-    public struct Metric: Identifiable {
-        public var id: String
-        public var value: String
-        public var label: String
-
-        public init(id: String? = nil, value: String, label: String) {
-            self.id = id ?? label
-            self.value = value
-            self.label = label
-        }
-    }
-
-    public var metricRows: [[Metric]]
-    public var activityDates: [Date]
-    public var activeSinceDate: Date?
-    public var activityTitle: String
-    public var activeSinceTitle: String
-
-    public init(
-        metricRows: [[Metric]],
-        activityDates: [Date],
-        activeSinceDate: Date? = nil,
-        activityTitle: String = "ACTIVITY",
-        activeSinceTitle: String = "Active since"
-    ) {
-        self.metricRows = metricRows
-        self.activityDates = activityDates
-        self.activeSinceDate = activeSinceDate
-        self.activityTitle = activityTitle
-        self.activeSinceTitle = activeSinceTitle
-    }
+public protocol ProfileViewSnapshot {
+    var sessionCount: Int { get }
+    var messageCount: Int { get }
+    var totalTokenUsage: Int { get }
+    var streakDays: Int { get }
+    var longestStreakDays: Int { get }
+    var activeDayCount: Int { get }
+    var activityDates: [Date] { get }
+    var activeSinceDate: Date? { get }
 }
 
 public struct ProfileView<Content: View>: View {
@@ -71,8 +48,8 @@ public struct ProfileView<Content: View>: View {
         NavigationStack {
             ScrollView(.vertical) {
                 VStack(spacing: 0) {
-                    if let dashboard = config.dashboard {
-                        ProfileDashboardView(dashboard: dashboard)
+                    if let snapshot = config.snapshot {
+                        ProfileSnapshotView(snapshot: snapshot)
                     }
                     content()
                 }
@@ -148,7 +125,7 @@ public struct ProfileView<Content: View>: View {
         public var headerButtons: [HeaderActionButton]
         public var placeholderSystemImage: String
         public var backgroundStyle: BackgroundStyle
-        public var dashboard: ProfileDashboard?
+        public var snapshot: (any ProfileViewSnapshot)?
 
         public init(
             avatarURL: URL = URL(string: "placeholder")!,
@@ -157,7 +134,7 @@ public struct ProfileView<Content: View>: View {
             headerButtons: [HeaderActionButton] = [],
             placeholderSystemImage: String = "person.crop.circle.fill",
             backgroundStyle: BackgroundStyle = .grouped,
-            dashboard: ProfileDashboard? = nil
+            snapshot: (any ProfileViewSnapshot)? = nil
         ) {
             self.avatarURL = avatarURL
             self.userName = userName
@@ -165,19 +142,17 @@ public struct ProfileView<Content: View>: View {
             self.headerButtons = headerButtons
             self.placeholderSystemImage = placeholderSystemImage
             self.backgroundStyle = backgroundStyle
-            self.dashboard = dashboard
+            self.snapshot = snapshot
         }
     }
 }
 
-private struct ProfileDashboardView: View {
-    let dashboard: ProfileDashboard
+private struct ProfileSnapshotView: View {
+    let snapshot: any ProfileViewSnapshot
 
     var body: some View {
         VStack(spacing: 24) {
-            if !dashboard.metricRows.isEmpty {
-                statsOverview
-            }
+            statsOverview
             activitySection
             activeSince
         }
@@ -189,12 +164,20 @@ private struct ProfileDashboardView: View {
     private var statsOverview: some View {
         let valueFont: Font = .title3.weight(.semibold).monospacedDigit()
         return VStack(spacing: 14) {
-            ForEach(Array(dashboard.metricRows.enumerated()), id: \.offset) { _, row in
-                HStack(spacing: 0) {
-                    ForEach(row) { metric in
-                        StatCell(value: metric.value, label: metric.label, valueFont: valueFont)
-                    }
-                }
+            HStack(spacing: 0) {
+                StatCell(value: "\(snapshot.sessionCount)", label: "Sessions", valueFont: valueFont)
+                StatCell(value: "\(snapshot.messageCount)", label: "Messages", valueFont: valueFont)
+                StatCell(
+                    value: ProfileSnapshotMetricFormat.compact(snapshot.totalTokenUsage),
+                    label: "Tokens",
+                    valueFont: valueFont
+                )
+            }
+
+            HStack(spacing: 0) {
+                StatCell(value: "\(snapshot.streakDays)", label: "Streak", valueFont: valueFont)
+                StatCell(value: "\(snapshot.longestStreakDays)", label: "Max Streak", valueFont: valueFont)
+                StatCell(value: "\(snapshot.activeDayCount)", label: "Active", valueFont: valueFont)
             }
         }
         .padding(.vertical, 16)
@@ -203,11 +186,11 @@ private struct ProfileDashboardView: View {
 
     private var activitySection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(dashboard.activityTitle)
+            Text("ACTIVITY")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
 
-            ActivityHeatmap(activityDates: dashboard.activityDates)
+            ActivityHeatmap(activityDates: snapshot.activityDates)
         }
         .padding(16)
         .dashboardCard()
@@ -215,9 +198,9 @@ private struct ProfileDashboardView: View {
 
     @ViewBuilder
     private var activeSince: some View {
-        if let activeSinceDate = dashboard.activeSinceDate {
+        if let activeSinceDate = snapshot.activeSinceDate {
             VStack(spacing: 4) {
-                Text(dashboard.activeSinceTitle)
+                Text("Active since")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                 Text(activeSinceDate, format: .dateTime.month(.wide).year())
@@ -227,6 +210,26 @@ private struct ProfileDashboardView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
         }
+    }
+}
+
+private enum ProfileSnapshotMetricFormat {
+    static func compact(_ value: Int) -> String {
+        let sign = value < 0 ? "-" : ""
+        let absolute = abs(Double(value))
+        let units: [(threshold: Double, suffix: String)] = [
+            (1_000_000_000, "B"),
+            (1_000_000, "M"),
+            (1_000, "K"),
+        ]
+
+        guard let unit = units.first(where: { absolute >= $0.threshold }) else {
+            return value.formatted(.number)
+        }
+
+        let scaled = absolute / unit.threshold
+        let rounded = (scaled * 10).rounded() / 10
+        return sign + String(format: "%.1f", rounded) + unit.suffix
     }
 }
 
