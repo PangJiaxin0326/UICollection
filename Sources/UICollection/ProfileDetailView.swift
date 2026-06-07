@@ -28,16 +28,11 @@ public protocol ProfileDetailViewContent: DynamicProperty {
     var constellation: ProfileDetailConstellation? { get }
 
     func saveAvatarData(_ data: Data) async
-    func normalize()
-}
-
-public extension ProfileDetailViewContent {
-    func normalize() {}
 }
 
 public struct ProfileDetailConstellation: Equatable, Sendable {
-    public var name: String
-    public var symbol: String
+    public let name: String
+    public let symbol: String
 
     public init(name: String, symbol: String) {
         self.name = name
@@ -45,9 +40,6 @@ public struct ProfileDetailConstellation: Equatable, Sendable {
     }
 }
 
-/// Profile overview pushed from the "Profile" header button. The profile is
-/// arranged by meaning: identity, journal guidance, personal details, and local
-/// context.
 public struct ProfileDetailView<Content: ProfileDetailViewContent>: View {
     @State private var photosPickerItem: PhotosPickerItem?
     private var content: Content
@@ -77,9 +69,6 @@ public struct ProfileDetailView<Content: ProfileDetailViewContent>: View {
             guard let item else { return }
             photosPickerItem = nil
             Task { await saveAvatar(from: item) }
-        }
-        .onAppear {
-            content.normalize()
         }
     }
 

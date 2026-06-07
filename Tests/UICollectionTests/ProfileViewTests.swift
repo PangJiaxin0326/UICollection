@@ -23,7 +23,7 @@ private struct TestProfileDetailContent: ProfileDetailViewContent {
     var profileNotes: Binding<String> = .constant("Remember context")
     var countryDisplay: String? = "United States (US)"
     var birthdayDisplay: String? = "June 7, 2026"
-    var constellation: ProfileDetailConstellation? = .init(name: "Gemini", symbol: "Gemini")
+    var constellation: ProfileDetailConstellation? = .init(name: "Gemini", symbol: "♊")
 
     func saveAvatarData(_ data: Data) async {}
 }
@@ -41,5 +41,6 @@ private struct TestProfileDetailContent: ProfileDetailViewContent {
 
     #expect(content.userName.wrappedValue == "Alex")
     #expect(content.constellation?.name == "Gemini")
+    #expect(content.constellation?.symbol == "♊")
     _ = view
 }
