@@ -61,7 +61,7 @@ public struct ProfileDetailView<Content: ProfileDetailViewContent>: View {
             .padding(.bottom, 80)
         }
         .background(profileBackground)
-        .navigationTitle("Profile")
+        .navigationTitle(Text("Profile", bundle: .module))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -114,17 +114,25 @@ public struct ProfileDetailView<Content: ProfileDetailViewContent>: View {
                 .contentShape(Circle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Change avatar")
+            .accessibilityLabel(uiCollectionText("Change avatar"))
 
             VStack(spacing: 8) {
-                TextField("Add your name", text: content.userName)
+                TextField(
+                    UICollectionLocalization.string("Add your name"),
+                    text: content.userName,
+                    prompt: uiCollectionText("Add your name")
+                )
                     .font(.title2.weight(.semibold))
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .textFieldStyle(.plain)
                     .submitLabel(.done)
 
-                TextField("Pronouns", text: content.userPronouns)
+                TextField(
+                    UICollectionLocalization.string("Pronouns"),
+                    text: content.userPronouns,
+                    prompt: uiCollectionText("Pronouns")
+                )
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -224,11 +232,12 @@ public struct ProfileDetailView<Content: ProfileDetailViewContent>: View {
 }
 
 private struct ProfileSectionHeader: View {
-    var title: String
+    var title: LocalizedStringKey
 
     var body: some View {
-        Text(title.uppercased())
+        Text(title, bundle: .module)
             .font(.caption2.weight(.semibold))
+            .textCase(.uppercase)
             .foregroundStyle(.secondary)
             .padding(.bottom, 10)
     }
@@ -237,8 +246,8 @@ private struct ProfileSectionHeader: View {
 private struct EditableProfileField: View {
     var icon: String
     var tint: Color
-    var label: String
-    var placeholder: String
+    var label: LocalizedStringKey
+    var placeholder: LocalizedStringKey
     @Binding var text: String
     var lineLimit: ClosedRange<Int>
 
@@ -248,11 +257,16 @@ private struct EditableProfileField: View {
                 .padding(.top, 4)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(label)
+                Text(label, bundle: .module)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.primary)
 
-                TextField(placeholder, text: $text, axis: .vertical)
+                TextField(
+                    "",
+                    text: $text,
+                    prompt: Text(placeholder, bundle: .module),
+                    axis: .vertical
+                )
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(lineLimit)
@@ -267,7 +281,7 @@ private struct EditableProfileField: View {
 private struct LockedProfileRow: View {
     var icon: String
     var tint: Color
-    var label: String
+    var label: LocalizedStringKey
     var value: String?
     var isSystemImage = true
 
@@ -276,13 +290,20 @@ private struct LockedProfileRow: View {
             ProfileFieldIcon(icon: icon, tint: tint, isSystemImage: isSystemImage)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(label)
+                Text(label, bundle: .module)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.primary)
-                Text(value ?? "Not set")
+                if let value {
+                    Text(value)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                } else {
+                    uiCollectionText("Not set")
                     .font(.subheadline)
-                    .foregroundStyle(value == nil ? .tertiary : .secondary)
+                    .foregroundStyle(.tertiary)
                     .lineLimit(2)
+                }
             }
 
             Spacer(minLength: 12)

@@ -53,7 +53,7 @@ public struct AIComparison<T: AIComparisonOptionRepresentable>: View {
     private func column(for option: T) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             if option.isRecommended {
-                Text("RECOMMENDED")
+                aiUICollectionText("RECOMMENDED")
                     .font(.caption2.bold())
                     .tracking(1.2)
                     .padding(.horizontal, 10)

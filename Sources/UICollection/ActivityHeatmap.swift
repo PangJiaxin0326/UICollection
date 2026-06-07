@@ -51,7 +51,7 @@ public struct ActivityHeatmap: View {
             .aspectRatio(CGFloat(weeks) / CGFloat(rows), contentMode: .fit)
 
             HStack(spacing: 4) {
-                Text("Less")
+                uiCollectionText("Less")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                 ForEach(0..<4, id: \.self) { level in
@@ -59,7 +59,7 @@ public struct ActivityHeatmap: View {
                         .fill(levelColor(level))
                         .frame(width: 10, height: 10)
                 }
-                Text("More")
+                uiCollectionText("More")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }

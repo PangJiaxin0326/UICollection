@@ -43,6 +43,9 @@ let package = Package(
             dependencies: [
                 .product(name: "AIToolKit", package: "AIToolKit"),
             ],
+            resources: [
+                .process("Resources")
+            ],
             swiftSettings: aiUICollectionSwiftSettings
         ),
         .testTarget(

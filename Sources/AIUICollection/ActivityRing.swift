@@ -135,7 +135,7 @@ struct ActivityRing: View, @MainActor Animatable {
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Activity ring")
+        .accessibilityLabel(aiUICollectionText("Activity ring"))
         .accessibilityValue(
             Text(value, format: .percent.precision(.fractionLength(0)))
         )

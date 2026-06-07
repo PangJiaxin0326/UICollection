@@ -178,7 +178,7 @@ private struct ProfileSnapshotView: View {
 
     private var activitySection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("ACTIVITY")
+            uiCollectionText("ACTIVITY")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
 
@@ -192,7 +192,7 @@ private struct ProfileSnapshotView: View {
     private var activeSince: some View {
         if let activeSinceDate = snapshot.activeSinceDate {
             VStack(spacing: 4) {
-                Text("Active since")
+                uiCollectionText("Active since")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                 Text(activeSinceDate, format: .dateTime.month(.wide).year())

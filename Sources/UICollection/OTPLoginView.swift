@@ -98,10 +98,10 @@ public struct OTPLoginView: View {
 
     private var headerField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Welcome Back")
+            uiCollectionText("Welcome Back")
                 .font(.largeTitle)
 
-            Text("Please verify your phone number to continue.")
+            uiCollectionText("Please verify your phone number to continue.")
                 .font(.callout)
         }
         .fontWeight(.medium)
@@ -134,13 +134,21 @@ public struct OTPLoginView: View {
     @ViewBuilder
     private var mobileNumberField: some View {
 #if os(iOS)
-        TextField("Mobile Number", text: $mobileNumber)
+        TextField(
+            UICollectionLocalization.string("Mobile Number"),
+            text: $mobileNumber,
+            prompt: uiCollectionText("Mobile Number")
+        )
             .textContentType(.telephoneNumber)
             .keyboardType(.phonePad)
             .focused($focusedField, equals: .mobileNumber)
             .padding(.horizontal, 12)
 #else
-        TextField("Mobile Number", text: $mobileNumber)
+        TextField(
+            UICollectionLocalization.string("Mobile Number"),
+            text: $mobileNumber,
+            prompt: uiCollectionText("Mobile Number")
+        )
             .textContentType(.telephoneNumber)
             .focused($focusedField, equals: .mobileNumber)
             .padding(.horizontal, 12)
@@ -152,7 +160,7 @@ public struct OTPLoginView: View {
             guard canRequestCode else { return }
             showVerificationView = true
         } label: {
-            Text("Send Code")
+            uiCollectionText("Send Code")
                 .font(.callout)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity)
@@ -167,17 +175,21 @@ public struct OTPLoginView: View {
         if termsOfServiceURL != nil || privacyPolicyURL != nil {
             HStack(spacing: 4) {
                 if let termsOfServiceURL {
-                    Link("Terms of Service", destination: termsOfServiceURL)
-                        .underline()
+                    Link(destination: termsOfServiceURL) {
+                        uiCollectionText("Terms of Service")
+                            .underline()
+                    }
                 }
 
                 if termsOfServiceURL != nil, privacyPolicyURL != nil {
-                    Text("&")
+                    uiCollectionText("&")
                 }
 
                 if let privacyPolicyURL {
-                    Link("Privacy Policy", destination: privacyPolicyURL)
-                        .underline()
+                    Link(destination: privacyPolicyURL) {
+                        uiCollectionText("Privacy Policy")
+                            .underline()
+                    }
                 }
             }
             .font(.callout)
@@ -245,7 +257,7 @@ extension OTPLoginView {
                 validationTask?.cancel()
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Verification code")
+            .accessibilityLabel(uiCollectionText("Verification code"))
             .accessibilityValue(accessibilityValue)
             .accessibilityAddTraits(.isButton)
         }
@@ -278,10 +290,10 @@ extension OTPLoginView {
 
         private var accessibilityValue: String {
             if value.isEmpty {
-                return "No digits entered"
+                return UICollectionLocalization.string("No digits entered")
             }
 
-            return "\(value.count) of \(type.rawValue) digits entered"
+            return UICollectionLocalization.string("\(value.count) of \(type.rawValue) digits entered")
         }
 
         private func handleValueChange(_ newValue: String) {
@@ -416,7 +428,7 @@ extension OTPLoginView {
                 if isProcessingCode {
                     ProgressView()
                         .controlSize(.large)
-                        .accessibilityLabel("Verifying code")
+                        .accessibilityLabel(uiCollectionText("Verifying code"))
                 }
             }
             .blur(radius: showSuccessBlur ? 14 : 0)
@@ -426,8 +438,8 @@ extension OTPLoginView {
             .task {
                 await sendVerificationCode()
             }
-            .alert("Authentication Error", isPresented: $showAlert) {
-                Button("OK") {
+            .alert(Text("Authentication Error", bundle: .module), isPresented: $showAlert) {
+                Button(UICollectionLocalization.string("OK")) {
                     if isCodeSent == false {
                         dismiss()
                     }
@@ -440,22 +452,28 @@ extension OTPLoginView {
         private var VerificationContent: some View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Verification")
+                    uiCollectionText("Verification")
                         .font(.largeTitle)
 
-                    Text("Enter the 6 digit code.")
+                    uiCollectionText("Enter the 6 digit code.")
                         .font(.callout)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fontWeight(.medium)
                 .overlay(alignment: .trailing) {
-                    Button("Close", systemImage: "xmark.circle.fill") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Label {
+                            uiCollectionText("Close")
+                        } icon: {
+                            Image(systemName: "xmark.circle.fill")
+                        }
                     }
                     .labelStyle(.iconOnly)
                     .font(.title)
                     .tint(.gray)
-                    .accessibilityLabel("Close verification")
+                    .accessibilityLabel(uiCollectionText("Close verification"))
                     .offset(x: 10, y: -15)
                 }
                 .padding(.top, 10)
@@ -481,7 +499,7 @@ extension OTPLoginView {
                 }
                 .frame(height: 150)
 
-                Text("Sending Verification Code...")
+                uiCollectionText("Sending Verification Code...")
                     .font(.title3)
                     .fontWeight(.semibold)
             }
@@ -583,18 +601,20 @@ extension OTPLoginView {
         private let countries = CountryRepository.countries
 
         var body: some View {
-            Picker("Country code", selection: $selection) {
+            Picker(selection: $selection) {
                 ForEach(countries) { country in
                     if let dialCode = country.dialCode {
                         Text("\(dialCode) (\(country.code))")
                             .tag(country as Country?)
                     }
                 }
+            } label: {
+                uiCollectionText("Country code")
             }
             .pickerStyle(.menu)
             .labelsHidden()
             .tint(.primary)
-            .accessibilityLabel("Country code")
+            .accessibilityLabel(uiCollectionText("Country code"))
             .onAppear(perform: selectDefaultCountryIfNeeded)
         }
 

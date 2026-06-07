@@ -29,7 +29,7 @@ public struct StatCell: View {
                 .font(valueFont)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-            Text(label)
+            Text(LocalizedStringKey(label), bundle: .module)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
