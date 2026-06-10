@@ -27,7 +27,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/PangJiaxin0326/AIToolKit.git", branch: "main"),
+        .package(path: "../AIToolKit"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.

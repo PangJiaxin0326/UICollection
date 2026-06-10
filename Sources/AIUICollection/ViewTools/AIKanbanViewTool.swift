@@ -7,9 +7,11 @@
 //
 
 import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public struct AIKanbanViewTool: ViewTool {
+    @Generable
     public struct Input: Codable, Sendable {
         public let model: String
 
@@ -26,22 +28,18 @@ public struct AIKanbanViewTool: ViewTool {
         self.render = render
     }
 
-    public static let name = "render_ai_kanban"
-    public static let description = """
+    public static let toolName = "render_ai_kanban"
+    public static let toolDescription = """
         Render a multi-column kanban board. Pick when items group naturally \
         by stage or status (Backlog → In progress → Done, deal stages, \
         pipeline phases). The host's render closure groups items into \
         columns.
         """
 
-    public static let inputSchema: ToolSchema = .object(
-        properties: [
-            "model": .string(description: ViewToolDefaults.modelHelp),
-        ],
-        required: ["model"]
-    )
+    public var name: String { Self.toolName }
+    public var description: String { Self.toolDescription }
 
-    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

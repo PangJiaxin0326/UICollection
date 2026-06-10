@@ -9,9 +9,11 @@
 //
 
 import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public struct AICardViewTool: ViewTool {
+    @Generable
     public struct Input: Codable, Sendable {
         public let model: String
         public let id: String?
@@ -30,22 +32,17 @@ public struct AICardViewTool: ViewTool {
         self.render = render
     }
 
-    public static let name = "render_ai_card"
-    public static let description = """
+    public static let toolName = "render_ai_card"
+    public static let toolDescription = """
         Render a hero feature card for a single rich entity worth pausing on \
         (a recipe, a recommended product, a flight option). Use when the \
         answer is one item, not a list.
         """
 
-    public static let inputSchema: ToolSchema = .object(
-        properties: [
-            "model": .string(description: ViewToolDefaults.modelHelp),
-            "id": .string(description: "Optional id of the specific entity within the model. Omit when the model has one canonical item."),
-        ],
-        required: ["model"]
-    )
+    public var name: String { Self.toolName }
+    public var description: String { Self.toolDescription }
 
-    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

@@ -8,9 +8,11 @@
 //
 
 import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public struct AIGalleryViewTool: ViewTool {
+    @Generable
     public struct Input: Codable, Sendable {
         public let model: String
         public let title: String
@@ -29,21 +31,16 @@ public struct AIGalleryViewTool: ViewTool {
         self.render = render
     }
 
-    public static let name = "render_ai_gallery"
-    public static let description = """
+    public static let toolName = "render_ai_gallery"
+    public static let toolDescription = """
         Render a featured-photo gallery. The first item becomes the hero \
         tile; the rest fill a 3-column thumbnail grid below.
         """
 
-    public static let inputSchema: ToolSchema = .object(
-        properties: [
-            "model": .string(description: ViewToolDefaults.modelHelp),
-            "title": .string(description: "Gallery title."),
-        ],
-        required: ["model", "title"]
-    )
+    public var name: String { Self.toolName }
+    public var description: String { Self.toolDescription }
 
-    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

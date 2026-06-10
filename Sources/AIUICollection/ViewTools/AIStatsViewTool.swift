@@ -7,9 +7,11 @@
 //
 
 import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public struct AIStatsViewTool: ViewTool {
+    @Generable
     public struct Input: Codable, Sendable {
         public let model: String
         public let title: String
@@ -30,23 +32,17 @@ public struct AIStatsViewTool: ViewTool {
         self.render = render
     }
 
-    public static let name = "render_ai_stats"
-    public static let description = """
+    public static let toolName = "render_ai_stats"
+    public static let toolDescription = """
         Render a KPI / metric dashboard as a grid of tiles. Each tile carries \
         a headline number, optional unit (e.g. '%', 'ms', 'k'), and optional \
         signed delta percent for period-over-period change.
         """
 
-    public static let inputSchema: ToolSchema = .object(
-        properties: [
-            "model": .string(description: ViewToolDefaults.modelHelp),
-            "title": .string(description: "Dashboard title (e.g. 'This week')."),
-            "columns": .integer,
-        ],
-        required: ["model", "title"]
-    )
+    public var name: String { Self.toolName }
+    public var description: String { Self.toolDescription }
 
-    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

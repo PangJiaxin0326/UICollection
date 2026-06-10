@@ -8,9 +8,11 @@
 //
 
 import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public struct AIComparisonViewTool: ViewTool {
+    @Generable
     public struct Input: Codable, Sendable {
         public let model: String
         public let title: String
@@ -29,22 +31,17 @@ public struct AIComparisonViewTool: ViewTool {
         self.render = render
     }
 
-    public static let name = "render_ai_comparison"
-    public static let description = """
+    public static let toolName = "render_ai_comparison"
+    public static let toolDescription = """
         Render a side-by-side comparison of a small set of options (≤4) the \
         user is deciding between — pricing tiers, competing products, plan \
         upgrades.
         """
 
-    public static let inputSchema: ToolSchema = .object(
-        properties: [
-            "model": .string(description: ViewToolDefaults.modelHelp),
-            "title": .string(description: "Section title (e.g. 'Pick a plan')."),
-        ],
-        required: ["model", "title"]
-    )
+    public var name: String { Self.toolName }
+    public var description: String { Self.toolDescription }
 
-    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

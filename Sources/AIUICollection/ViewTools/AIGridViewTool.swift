@@ -7,9 +7,11 @@
 //
 
 import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public struct AIGridViewTool: ViewTool {
+    @Generable
     public struct Input: Codable, Sendable {
         public let model: String
         public let title: String?
@@ -30,23 +32,17 @@ public struct AIGridViewTool: ViewTool {
         self.render = render
     }
 
-    public static let name = "render_ai_grid"
-    public static let description = """
+    public static let toolName = "render_ai_grid"
+    public static let toolDescription = """
         Render a bento-style adaptive grid of icon-led tiles. Use for menus, \
         action launchers, capability overviews — peer items with no inherent \
         ordering.
         """
 
-    public static let inputSchema: ToolSchema = .object(
-        properties: [
-            "model": .string(description: ViewToolDefaults.modelHelp),
-            "title": .string(description: "Optional section header."),
-            "columns": .integer,
-        ],
-        required: ["model"]
-    )
+    public var name: String { Self.toolName }
+    public var description: String { Self.toolDescription }
 
-    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

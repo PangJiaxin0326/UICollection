@@ -16,6 +16,8 @@
 //    AIComparison) takes items conforming to this.
 //
 
+import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public protocol AIRepresentable: Identifiable, Sendable {
@@ -44,6 +46,32 @@ public enum AISortOption: String, CaseIterable, Equatable, CustomStringConvertib
     case nameDescending = "Z–A"
 
     public var description: String { rawValue }
+}
+
+extension AISortOption: Generable {
+    public static var generationSchema: GenerationSchema {
+        do {
+            return try GenerationSchema(
+                root: DynamicGenerationSchema(
+                    name: "AISortOption",
+                    anyOf: Self.allCases.map(\.rawValue)
+                ),
+                dependencies: []
+            )
+        } catch {
+            preconditionFailure("Invalid AISortOption schema: \(error)")
+        }
+    }
+
+    public init(_ content: GeneratedContent) throws {
+        guard let rawValue = content.stringValue,
+              let value = Self(rawValue: rawValue) else {
+            throw GenericToolError(message: "Invalid AI sort option.")
+        }
+        self = value
+    }
+
+    public var generatedContent: GeneratedContent { .string(rawValue) }
 }
 
 public protocol AIListRepresentable: AIRepresentable {

@@ -9,9 +9,11 @@
 //
 
 import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public struct AIListViewTool: ViewTool {
+    @Generable
     public struct Input: Codable, Sendable {
         public let model: String
         public let sortedBy: AISortOption?
@@ -30,22 +32,17 @@ public struct AIListViewTool: ViewTool {
         self.render = render
     }
 
-    public static let name = "render_ai_list"
-    public static let description = """
+    public static let toolName = "render_ai_list"
+    public static let toolDescription = """
         Render the prototype sortable vertical list. Use when the answer is \
         a peer set of entities the user will browse and drill into \
         (contacts, documents, companies). The host owns detail-on-tap.
         """
 
-    public static let inputSchema: ToolSchema = .object(
-        properties: [
-            "model": .string(description: ViewToolDefaults.modelHelp),
-            "sortedBy": .string(description: "Initial sort: 'Most recent', 'Oldest first', 'A–Z', 'Z–A'."),
-        ],
-        required: ["model"]
-    )
+    public var name: String { Self.toolName }
+    public var description: String { Self.toolDescription }
 
-    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }

@@ -8,9 +8,11 @@
 //
 
 import AIToolKit
+import FoundationModels
 import SwiftUI
 
 public struct AITimelineViewTool: ViewTool {
+    @Generable
     public struct Input: Codable, Sendable {
         public let model: String
 
@@ -27,21 +29,17 @@ public struct AITimelineViewTool: ViewTool {
         self.render = render
     }
 
-    public static let name = "render_ai_timeline"
-    public static let description = """
+    public static let toolName = "render_ai_timeline"
+    public static let toolDescription = """
         Render a vertical event timeline. Pick this when ordering is \
         meaningful and each entry has a timestamp (itineraries, changelogs, \
         project milestones).
         """
 
-    public static let inputSchema: ToolSchema = .object(
-        properties: [
-            "model": .string(description: ViewToolDefaults.modelHelp),
-        ],
-        required: ["model"]
-    )
+    public var name: String { Self.toolName }
+    public var description: String { Self.toolDescription }
 
-    @MainActor public func call(_ input: Input, in context: ToolContext) async throws -> AnyView {
+    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
         try await render(input, context)
     }
 }
