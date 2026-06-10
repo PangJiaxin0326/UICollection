@@ -59,7 +59,7 @@ public struct AIChartViewTool: ViewTool {
         }
     }
 
-    public typealias Render = @MainActor @Sendable (Input, ToolContext) async throws -> AnyView
+    public typealias Render = @MainActor @Sendable (Input) async throws -> AnyView
 
     public let render: Render
 
@@ -78,7 +78,7 @@ public struct AIChartViewTool: ViewTool {
     public var name: String { Self.toolName }
     public var description: String { Self.toolDescription }
 
-    @MainActor public func call(arguments input: Input, in context: ToolContext) async throws -> AnyView {
-        try await render(input, context)
+    @MainActor public func call(arguments input: Input) async throws -> AnyView {
+        try await render(input)
     }
 }
