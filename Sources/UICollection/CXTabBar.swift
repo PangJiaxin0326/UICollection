@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+
+#if os(iOS)
 protocol FABTab: Hashable, CustomStringConvertible, CaseIterable, Identifiable {
     static var `default`: Self { get }
     var symbol: String { get }
@@ -37,7 +39,18 @@ struct CXTabBarPreview: View {
     @State private var activeTab: AppTab? = .default
     var body: some View {
         CXTabBar(selection: $activeTab) { tab in
-            Text(tab.description)
+            NavigationStack {
+                List {
+                    NavigationLink {
+                        NavigationStack {
+                            Text("Hello")
+                                .navigationTitle("HELLO")
+                        }
+                    } label: {
+                        Text(tab.description)
+                    }
+                }
+            }
         } tabFabContent: { tab in
             Text(tab.symbol)
         } accessoryContent: {
@@ -74,16 +87,16 @@ struct CXTabBar<T: FABTab, TabContent: View, TabFabContent: View, AccessoryConte
                         .tabOverlay(isPresented: isFABExpanded) {
                             tabFabContent(tab)
                                 .frame(maxWidth: .infinity, maxHeight: fabHeight)
+                                .contentShape(.rect)
+                                .onTapGesture { fabHeight = 660 - fabHeight }
                         } onDismiss: {
                             isFABExpanded = false
                         }
                         .frame(maxWidth: .infinity, alignment: .bottom)
-                        .onTapGesture { fabHeight = 660 - fabHeight }
                         .animation(.smooth, value: fabHeight)
                 }
             }
             Tab.init(value: .none, role: .search) {
-                
             } label: {
                 Image(systemName: "plus")
             }
@@ -217,3 +230,4 @@ fileprivate extension UIView {
 #Preview {
     CXTabBarPreview()
 }
+#endif
