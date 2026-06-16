@@ -41,7 +41,7 @@ public struct AIList<T: AIListRepresentable, Content: View>: View {
                         .foregroundStyle(.secondary)
                         .padding(.vertical, 5)
                         .padding(.horizontal)
-                        .glassEffect(.clear.tint(.gray.opacity(0.1)), in: .capsule)
+                        .background(.thinMaterial, in: .capsule)
                     Spacer()
                 }
                 .padding()
