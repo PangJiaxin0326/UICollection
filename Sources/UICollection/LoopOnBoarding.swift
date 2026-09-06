@@ -88,7 +88,11 @@ struct LoopOnBoarding: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
                 }
+                #if os(visionOS)
+                .buttonStyle(.borderedProminent)
+                #else
                 .buttonStyle(.glassProminent)
+                #endif
                 .tint(config.tint)
                 .padding(.horizontal, 30)
                 .padding(.bottom, 10)

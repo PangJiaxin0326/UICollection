@@ -166,7 +166,11 @@ public struct OTPLoginView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 6)
         }
+        #if os(visionOS)
+        .buttonStyle(.borderedProminent)
+        #else
         .buttonStyle(.glassProminent)
+        #endif
         .disabled(canRequestCode == false)
     }
 

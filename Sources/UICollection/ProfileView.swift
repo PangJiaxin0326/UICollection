@@ -332,7 +332,11 @@ extension ProfileView {
                 .foregroundStyle(.white)
                 .padding(.horizontal, isLargeHeader ? 24 : 10)
                 .padding(.vertical, isLargeHeader ? 12 : 6)
+                #if os(visionOS)
+                .glassBackgroundEffect(in: Circle())
+                #else
                 .glassEffect(.clear.tint(.black.opacity(0.18)), in: .circle)
+                #endif
                 .offset(y: isLargeHeader ? 0 : 5)
         }
     }
@@ -438,7 +442,12 @@ extension ProfileView {
             ZStack {
                 Rectangle()
                     .fill(.clear)
+                    #if os(visionOS)
+                    .background(tint.opacity(0.18))
+                    .glassBackgroundEffect(in: Rectangle())
+                    #else
                     .glassEffect(.clear.tint(tint.opacity(0.8)), in: .rect)
+                    #endif
                     .mask {
                         LinearGradient(colors: [
                             .black,
