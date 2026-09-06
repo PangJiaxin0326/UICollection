@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Synchronization
 import FoundationModels
 import AIToolKit
 
@@ -55,6 +56,17 @@ public struct ProgressiveViewWorkflowRunner: Sendable {
         model: M,
         onComponent: (@Sendable (ProgressiveComponent) -> Void)? = nil
     ) async -> ProgressiveRunResult {
+        guard await catalog.beginRun() else {
+            return ProgressiveRunResult(plan: [], components: [], sessionError: "This catalog already has an active run.")
+        }
+        let result = await runAdmitted(intent: intent, model: model, onComponent: onComponent)
+        await catalog.endRun()
+        return result
+    }
+
+    private func runAdmitted<M: LanguageModel>(
+        intent: String, model: M, onComponent: (@Sendable (ProgressiveComponent) -> Void)?
+    ) async -> ProgressiveRunResult {
         await catalog.resetStage()
 
         let finishing: [any FinishingTool] = await catalog.finishingTools
@@ -82,7 +94,7 @@ public struct ProgressiveViewWorkflowRunner: Sendable {
             catalogue: finishingTools,
             stepTools: { index in
                 let plan = state.plan
-                guard index < plan.count, let tool = finishingByName[plan[index]] else { return [] }
+                guard plan.indices.contains(index), let tool = finishingByName[plan[index]] else { return [] }
                 return [tool as any Tool]
             }
         )
@@ -136,6 +148,8 @@ public struct ProgressiveViewWorkflowRunner: Sendable {
                 session.properties.progressiveStage = .build
                 session.properties.progressiveStep = index
 
+                try Task.checkCancellation()
+                let previousCount = await catalog.producedSpecs().count
                 let buildPrompt = "Build component \(index + 1) now."
                 do {
                     _ = try await session.respond(to: buildPrompt).content
@@ -145,7 +159,8 @@ public struct ProgressiveViewWorkflowRunner: Sendable {
                     if !(unwrapped is WorkflowStageComplete) { throw error }
                 }
 
-                guard let spec = await catalog.producedSpecs().last else { continue }
+                let specs = await catalog.producedSpecs()
+                guard specs.count > previousCount, let spec = specs.last else { continue }
                 let elapsed = (ContinuousClock.now - started).seconds
                 state.usedSources.append(spec.dataSourceKey)
                 let component = ProgressiveComponent(
@@ -189,46 +204,50 @@ public struct ProgressiveViewWorkflowRunner: Sendable {
     ) -> [String] {
         var plan: [String] = []
         for raw in selection.toolNames {
-            let needle = raw.lowercased()
+            let needle = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             if let exact = finishingNames.first(where: { $0.lowercased() == needle }) {
                 plan.append(exact)
-            } else if let match = finishingNames.first(where: { needle.contains($0.lowercased()) }) {
-                plan.append(match)
             }
         }
-        return Array(plan.prefix(cap))
+        return Array(plan.prefix(max(0, cap)))
     }
 }
 
 /// Host-side run state mirrored for the profile hooks/instructions (which run
 /// synchronously with the session machinery). Lock-based.
-private final class ProgressiveState: @unchecked Sendable {
-    private let lock = NSLock()
-    private var _stage: ProgressiveStage = .plan
-    private var _step = 0
-    private var _plan: [String] = []
-    private var _used: [String] = []
-    private var _cutIndex = 0
+private final class ProgressiveState: Sendable {
+    private struct State: Sendable {
+        var stage: ProgressiveStage = .plan
+        var step: Int = 0
+        var plan: [String] = []
+        var usedSources: [String] = []
+        var cutIndex: Int = 0
+    }
+    private let state = Mutex(State())
 
     var stage: ProgressiveStage {
-        get { lock.lock(); defer { lock.unlock() }; return _stage }
-        set { lock.lock(); _stage = newValue; lock.unlock() }
+        get { state.withLock { $0.stage } }
+        set { state.withLock { $0.stage = newValue } }
     }
+
     var step: Int {
-        get { lock.lock(); defer { lock.unlock() }; return _step }
-        set { lock.lock(); _step = newValue; lock.unlock() }
+        get { state.withLock { $0.step } }
+        set { state.withLock { $0.step = newValue } }
     }
+
     var plan: [String] {
-        get { lock.lock(); defer { lock.unlock() }; return _plan }
-        set { lock.lock(); _plan = newValue; lock.unlock() }
+        get { state.withLock { $0.plan } }
+        set { state.withLock { $0.plan = newValue } }
     }
+
     var usedSources: [String] {
-        get { lock.lock(); defer { lock.unlock() }; return _used }
-        set { lock.lock(); _used = newValue; lock.unlock() }
+        get { state.withLock { $0.usedSources } }
+        set { state.withLock { $0.usedSources = newValue } }
     }
+
     var cutIndex: Int {
-        get { lock.lock(); defer { lock.unlock() }; return _cutIndex }
-        set { lock.lock(); _cutIndex = newValue; lock.unlock() }
+        get { state.withLock { $0.cutIndex } }
+        set { state.withLock { $0.cutIndex = newValue } }
     }
 }
 

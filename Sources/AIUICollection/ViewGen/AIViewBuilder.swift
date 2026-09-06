@@ -80,13 +80,20 @@ public enum AIViewBuilder {
         records: [AIRecord],
         title: String?,
         style: String?,
-        presentation: AIComponentPresentation = .standalone
+        presentation: AIComponentPresentation = .standalone,
+        sectionEntityLimit: Int? = nil
     ) -> AnyView {
         switch presentation {
         case .standalone:
             standalone(template: template, records: records, title: title, style: style)
         case .section:
-            AISectionBuilder.build(template: template, records: records, style: style)
+            // `sectionEntityLimit` lets a host that already curates the record
+            // window (a height-paged tile) render exactly what it passed instead
+            // of the section's default bounded preview. nil keeps the preview.
+            AISectionBuilder.build(
+                template: template, records: records, style: style,
+                entityLimit: sectionEntityLimit
+            )
         }
     }
 

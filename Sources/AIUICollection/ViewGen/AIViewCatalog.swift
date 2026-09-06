@@ -13,6 +13,7 @@ import AIToolKit
 
 @MainActor
 public final class AIViewCatalog {
+    private var isRunning = false
     public let stage: AIViewStage
     public let sources: [any AIDataSource]
     public let finishing: [AIViewCreatorTool]
@@ -24,6 +25,15 @@ public final class AIViewCatalog {
             AIViewCreatorTool(template: $0, sources: sources, stage: stage)
         }
     }
+
+    /// Runners sharing a catalog also share its stage; admit only one run.
+    func beginRun() -> Bool {
+        guard !isRunning else { return false }
+        isRunning = true
+        return true
+    }
+
+    func endRun() { isRunning = false }
 
     public var finishingTools: [any FinishingTool] { finishing }
 

@@ -19,6 +19,7 @@
 //
 
 import Foundation
+import Synchronization
 import FoundationModels
 import AIToolKit
 
@@ -54,6 +55,15 @@ public struct AIViewWorkflowRunner: Sendable {
     /// (main-actor) is reached only through `await` snapshots; the created view
     /// is recorded on the stage from inside the tool call.
     public func run<M: LanguageModel>(intent: String, model: M) async -> AIViewRunResult {
+        guard await catalog.beginRun() else {
+            return AIViewRunResult(selection: [], specs: [], sessionError: "This catalog already has an active run.")
+        }
+        let result = await runAdmitted(intent: intent, model: model)
+        await catalog.endRun()
+        return result
+    }
+
+    private func runAdmitted<M: LanguageModel>(intent: String, model: M) async -> AIViewRunResult {
         await catalog.resetStage()
 
         let finishing: [any FinishingTool] = await catalog.finishingTools
@@ -66,12 +76,10 @@ public struct AIViewWorkflowRunner: Sendable {
         let temperature = self.temperature
 
         // The view creators register no assistive tools, so the work surface is
-        // simply the selected finishing tools (the full set if selection empty).
+        // simply the selected finishing tools. Invalid selections never act.
         let workTools: @Sendable () -> [any Tool] = {
             let selection = state.selection
-            let chosen = selection.isEmpty
-                ? finishing
-                : finishing.filter { selection.contains($0.name) }
+            let chosen = finishing.filter { selection.contains($0.name) }
             return chosen.map { $0 as any Tool }
         }
 
@@ -114,6 +122,10 @@ public struct AIViewWorkflowRunner: Sendable {
             let reply = try await session.respond(to: scopePrompt).content
             let selection = Self.parseSelection(from: reply) ?? ToolSelection(toolNames: [])
             state.selection = selection.validated(against: finishingNames)
+            guard !state.selection.isEmpty else {
+                return AIViewRunResult(selection: [], specs: [], sessionError: "No valid view template was selected.")
+            }
+            try Task.checkCancellation()
 
             // Flip to work: cut all scope history; the selection crossed
             // host-side via `state`.
@@ -121,29 +133,17 @@ public struct AIViewWorkflowRunner: Sendable {
             session.properties.workflowStage = .work
             state.stage = .work
 
-            // Step 2 — work: one corrective retry budget for a bad source key.
+            // Step 2 — work: execute once; a failed tool may already have effects.
             let workPrompt = """
             User request: \(intent)
 
             Build the view now.
             """
-            var prompt = workPrompt
-            for attempt in 0...2 {
-                do {
-                    _ = try await session.respond(to: prompt).content
-                    break
-                } catch {
-                    let unwrapped =
-                        (error as? LanguageModelSession.ToolCallError)?.underlyingError ?? error
-                    if unwrapped is WorkflowStageComplete { break }
-                    guard attempt < 2 else { throw error }
-                    prompt = """
-                    Your previous attempt failed: \(error)
-
-                    Call exactly ONE template tool with a `dataSource` set to a \
-                    valid key from the list, then finish. \(workPrompt)
-                    """
-                }
+            do {
+                _ = try await session.respond(to: workPrompt).content
+            } catch {
+                let unwrapped = (error as? LanguageModelSession.ToolCallError)?.underlyingError ?? error
+                if !(unwrapped is WorkflowStageComplete) { throw error }
             }
         } catch {
             sessionError = "session error: \(error)"
@@ -179,7 +179,7 @@ public struct AIViewWorkflowRunner: Sendable {
 
     /// Parses the outermost JSON object of the scope reply into a typed
     /// `ToolSelection`, via the same `GeneratedContent` path guided generation
-    /// uses. `nil` → the caller falls back to the full catalogue.
+    /// uses. `nil` means selection failed; callers must not expand tool access.
     static func parseSelection(from reply: String) -> ToolSelection? {
         guard let start = reply.firstIndex(of: "{"),
               let end = reply.lastIndex(of: "}"),
@@ -194,22 +194,26 @@ public struct AIViewWorkflowRunner: Sendable {
 /// Host-side run state mirrored for the profile hooks (which can't read session
 /// properties). Lock-based: the hooks and the history transform run
 /// synchronously with the session's request machinery.
-private final class RunState: @unchecked Sendable {
-    private let lock = NSLock()
-    private var _stage: WorkflowStage = .scope
-    private var _selection: [String] = []
-    private var _cutIndex = 0
+private final class RunState: Sendable {
+    private struct State: Sendable {
+        var stage: WorkflowStage = .scope
+        var selection: [String] = []
+        var cutIndex: Int = 0
+    }
+    private let state = Mutex(State())
 
     var stage: WorkflowStage {
-        get { lock.lock(); defer { lock.unlock() }; return _stage }
-        set { lock.lock(); _stage = newValue; lock.unlock() }
+        get { state.withLock { $0.stage } }
+        set { state.withLock { $0.stage = newValue } }
     }
+
     var selection: [String] {
-        get { lock.lock(); defer { lock.unlock() }; return _selection }
-        set { lock.lock(); _selection = newValue; lock.unlock() }
+        get { state.withLock { $0.selection } }
+        set { state.withLock { $0.selection = newValue } }
     }
+
     var cutIndex: Int {
-        get { lock.lock(); defer { lock.unlock() }; return _cutIndex }
-        set { lock.lock(); _cutIndex = newValue; lock.unlock() }
+        get { state.withLock { $0.cutIndex } }
+        set { state.withLock { $0.cutIndex = newValue } }
     }
 }

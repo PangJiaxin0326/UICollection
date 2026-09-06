@@ -1,6 +1,7 @@
 // swift-tools-version: 6.3
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
+import Foundation
 import PackageDescription
 
 let aiUICollectionSwiftSettings: [SwiftSetting] = [
@@ -27,7 +28,10 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../AIToolKit"),
+        ProcessInfo.processInfo.environment["SWIFTPACKAGES_USE_LOCAL_DEPENDENCIES"] == "1"
+            ? .package(path: "../AIToolKit")
+            : .package(url: "https://github.com/PangJiaxin0326/AIToolKit.git",
+                       revision: "417c8023f9d99a6e739dc686c577b62729e71f31"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -50,7 +54,7 @@ let package = Package(
         ),
         .testTarget(
             name: "UICollectionTests",
-            dependencies: ["UICollection"]
+            dependencies: ["UICollection", "AIUICollection"]
         ),
     ],
     swiftLanguageModes: [.v6]
